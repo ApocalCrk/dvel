@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+benchmarks/build/
+cpp-sim/build/
+examples/build/
+rust-core/target/
+
+# CMake cache files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Simulator outputs
+*.out
+*.out.*
+trace_*.json
