@@ -8,7 +8,7 @@ Deterministic, in-memory event ledger with staking and slashing. Exposed over C 
 - Jail mechanism (1000 blocks default)
 - Economic penalties in SybilOverlay
 
-See `docs/STAKING_AND_SLASHING.md` for slashing implementation.
+See `docs/staking_and_slashing.md` for slashing implementation.
 
 ## What it does
 - **Events**: single-parent DAG with hash identity `H = SHA256(C(event) || signature)`, where `C` omits the signature slot.
