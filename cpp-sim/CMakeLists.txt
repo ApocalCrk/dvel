@@ -12,6 +12,7 @@ set(DVEL_SIM_EXECUTABLES
   sim_sybil
   sim_scheduler
   sim_metrics
+  gov_ledger
 )
 
 foreach(name IN LISTS DVEL_SIM_EXECUTABLES)

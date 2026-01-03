@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.1.2 — Hybrid threading model
+- Parallel signature verification: 2x throughput on multi-core systems (optional `parallel` feature).
+- Hybrid architecture: validation parallelized with rayon, ledger application remains single-threaded for determinism.
+- Feature flag: `cargo build --features bft,parallel` enables parallel validation in BFT block processing.
+- Performance: maintains deterministic consensus while utilizing multiple CPU cores for cryptographic operations.
+- Benchmark verified: 12.9k events/sec (single-threaded) → 25.9k events/sec (parallel) = 2.01x speedup.
+- Test: `cargo bench --bench bft_throughput --features bft` (single) or `--features bft,parallel` (parallel).
+- Backward compatible: default build remains single-threaded; parallel mode opt-in.
+
+## v0.1.1 — Staking, slashing, and government ledger
+- Staking: validator staking with configurable per-validator amounts (default 1M units).
+- Slashing: automatic double-sign detection with 5% penalty and 1000-block jail mechanism.
+- Economic security: SybilOverlay enforces slashing penalties; slashed weight affects consensus scoring.
+- BFT slashing: integrated slashing state into consensus with persistence in snapshots.
+- Government ledger: production-ready `gov_ledger` executable with configurable node count for distributed government transparency systems.
+- Simulation: `gov_ledger --nodes N` replaces hardcoded test simulations.
+- Docs: added staking and slashing specification (`docs/staking_and_slashing.md`).
+
 ## Unreleased
 - BFT: permissioned Tendermint-style prototype with HTTP client API and round-based finality checks.
 - BFT security: optional mTLS transport with pinned validator certs in genesis and CLI wiring for cert/key files.

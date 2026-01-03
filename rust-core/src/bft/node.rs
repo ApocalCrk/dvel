@@ -543,35 +543,78 @@ impl Node {
     }
 
     fn apply_block(&mut self, block: &Block) -> Result<(), String> {
-        let mut vctx = self.vctx_by_author.clone();
-        let mut known = self.ledger.hashes_set();
-
-        for tx in &block.txs {
-            let ev = decode_event(tx)?;
-            let ctx = vctx.entry(ev.author).or_insert_with(ValidationContext::new);
-            validate_event(&ev, ctx).map_err(|e| format!("{:?}", e))?;
-
-            let h = Ledger::hash_event(&ev);
-            if known.contains(&h) {
-                return Err("duplicate event hash in block".into());
+        // 0.1.2 Parallel validation (no state mutation)
+        #[cfg(feature = "parallel")]
+        {
+            use rayon::prelude::*;
+            let vctx = self.vctx_by_author.clone();
+            let known = self.ledger.hashes_set();
+            
+            // Parallel: decode and validate all events
+            let results: Result<Vec<_>, String> = block.txs.par_iter()
+                .map(|tx| {
+                    let ev = decode_event(tx)?;
+                    let mut ctx = vctx.get(&ev.author).cloned().unwrap_or_else(ValidationContext::new);
+                    validate_event(&ev, &mut ctx).map_err(|e| format!("{:?}", e))?;
+                    
+                    let h = Ledger::hash_event(&ev);
+                    if known.contains(&h) {
+                        return Err("duplicate event hash in block".into());
+                    }
+                    if ev.prev_hash != ZERO_HASH && !known.contains(&ev.prev_hash) {
+                        return Err("missing parent in block".into());
+                    }
+                    Ok((ev, h))
+                })
+                .collect();
+            
+            let validated = results?;
+            
+            // 0.1.2 Single-threaded application (deterministic order)
+            // Skip re-validation since 0.1.1 already verified signatures
+            for (ev, _h) in validated {
+                // Only update timestamp context without re-validating signature
+                let ctx = self.vctx_by_author.entry(ev.author).or_insert_with(ValidationContext::new);
+                if ev.timestamp > ctx.last_timestamp {
+                    ctx.last_timestamp = ev.timestamp;
+                }
+                self.ledger.try_add_event(ev).map_err(|e| format!("{:?}", e))?;
             }
-            if ev.prev_hash != ZERO_HASH && !known.contains(&ev.prev_hash) {
-                return Err("missing parent in block".into());
-            }
-            known.insert(h);
         }
+        
+        #[cfg(not(feature = "parallel"))]
+        {
+            // Original single-threaded path
+            let mut vctx = self.vctx_by_author.clone();
+            let mut known = self.ledger.hashes_set();
 
-        // Apply to ledger for real
-        for tx in &block.txs {
-            let ev = decode_event(tx)?;
-            let ctx = self
-                .vctx_by_author
-                .entry(ev.author)
-                .or_insert_with(ValidationContext::new);
-            validate_event(&ev, ctx).map_err(|e| format!("{:?}", e))?;
-            self.ledger
-                .try_add_event(ev)
-                .map_err(|e| format!("{:?}", e))?;
+            for tx in &block.txs {
+                let ev = decode_event(tx)?;
+                let ctx = vctx.entry(ev.author).or_insert_with(ValidationContext::new);
+                validate_event(&ev, ctx).map_err(|e| format!("{:?}", e))?;
+
+                let h = Ledger::hash_event(&ev);
+                if known.contains(&h) {
+                    return Err("duplicate event hash in block".into());
+                }
+                if ev.prev_hash != ZERO_HASH && !known.contains(&ev.prev_hash) {
+                    return Err("missing parent in block".into());
+                }
+                known.insert(h);
+            }
+
+            // Apply to ledger for real
+            for tx in &block.txs {
+                let ev = decode_event(tx)?;
+                let ctx = self
+                    .vctx_by_author
+                    .entry(ev.author)
+                    .or_insert_with(ValidationContext::new);
+                validate_event(&ev, ctx).map_err(|e| format!("{:?}", e))?;
+                self.ledger
+                    .try_add_event(ev)
+                    .map_err(|e| format!("{:?}", e))?;
+            }
         }
 
         Ok(())

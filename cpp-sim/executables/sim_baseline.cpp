@@ -1,10 +1,12 @@
-// DVEL reference simulator
-// Single-process, multi-peer (simulated)
+// DVEL Baseline Simulation - Protocol Testing
 //
-// NOTE:
-// Scheduler existed in early drafts as a time-concept scaffold.
-// It was removed after simulator core modularization.
-// Time is now represented explicitly as loop variable `t`.
+// Purpose: Test basic multi-peer consensus convergence
+// Type: Protocol validation (NOT production system)
+// Architecture:
+//   - cpp-sim/core: Simulation framework (calls Rust FFI)
+//   - rust-core: Actual consensus/validation logic
+// Note: For production, use gov_ledger.cpp (configurable)
+//       This file is for protocol testing only.
 
 #include <cstdio>
 #include <vector>

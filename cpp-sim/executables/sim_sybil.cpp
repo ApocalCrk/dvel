@@ -1,10 +1,15 @@
-// sim_sybil.cpp (patched: true equivocation + split-view + merge + shadow quarantine)
+// DVEL Sybil Overlay Simulation - Protocol Testing
 //
-// IMPORTANT:
-// - Does NOT modify NodeRuntime / Rust core.
-// - Still uses a shadow overlay (because runner doesn't have rust ledger hashes).
-// - But now the "equivocation" is REAL: same author, same prev_hash, two distinct events.
-// - Adds a minimal quarantine detector in shadow overlay so you can see weight go to 0.
+// Purpose: Test sybil resistance with equivocation detection
+// Type: Protocol validation (NOT production system)
+//
+// Tests:
+// - Real equivocation: same author, same prev_hash, two distinct events
+// - Shadow overlay tracks quarantine (weight goes to 0 on equivocation)
+// - Does NOT modify NodeRuntime / Rust core (uses shadow overlay)
+//
+// Note: For production, use gov_ledger.cpp
+//       This file is for sybil attack protocol testing.
 
 #include <cstdio>
 #include <cstdint>

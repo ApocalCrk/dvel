@@ -1,9 +1,13 @@
-// DVEL simulator
+// DVEL Scenario Simulation - Protocol Testing
 //
-// Adds:
-// - NodeRuntime split: local_append vs remote_receive
-// - GossipPolicy abstraction
-// - Scenario injection: honest / sybil swarm / eclipse
+// Purpose: Test different attack scenarios (sybil, eclipse)
+// Type: Protocol validation (NOT production system)
+// Features:
+//   - NodeRuntime split: local_append vs remote_receive
+//   - GossipPolicy abstraction
+//   - Scenario injection: honest / sybil swarm / eclipse
+// Note: For production, use gov_ledger.cpp
+//       This file is for protocol attack resistance testing.
 
 #include <cstdio>
 #include <vector>

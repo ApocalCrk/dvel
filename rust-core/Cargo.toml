@@ -1,6 +1,6 @@
 [package]
 name = "rust_core"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 
 [lib]
@@ -15,6 +15,7 @@ serde_json = { version = "1", optional = true }
 hex = "0.4"
 rustls = { version = "0.21", optional = true }
 rustls-pemfile = { version = "1", optional = true }
+rayon = { version = "1.8", optional = true }
 
 [dev-dependencies]
 tempfile = "3.10"
@@ -23,3 +24,9 @@ tempfile = "3.10"
 default = []
 trace_check = ["serde", "serde_json"]
 bft = ["serde", "serde_json", "rustls", "rustls-pemfile"]
+parallel = ["rayon"]
+
+[[bench]]
+name = "bft_throughput"
+harness = false
+required-features = ["bft"]

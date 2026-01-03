@@ -1,8 +1,15 @@
-// DVEL Scheduler experiments
+// DVEL Scheduler Simulation - Protocol Testing
 //
-// Purpose:
-// - Run scenarios under adversarial scheduling
-// - Observe impact on divergence & metrics
+// Purpose: Test adversarial message scheduling and delivery timing
+// Type: Protocol validation (NOT production system)
+//
+// Tests:
+// - Message delivery under adversarial scheduling
+// - Impact on divergence and consensus metrics
+// - Timing attack resistance
+//
+// Note: For production, use gov_ledger.cpp
+//       This file is for protocol timing/scheduling testing.
 
 #include <cstdio>
 #include <vector>

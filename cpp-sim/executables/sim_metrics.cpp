@@ -1,9 +1,16 @@
-// DVEL metrics runner
+// DVEL Metrics Simulation - Protocol Testing
 //
-// Purpose:
-// - Run a deterministic scenario
-// - Collect read-only metrics
-// - Print human-readable stdout
+// Purpose: Test scoring/metrics collection and convergence tracking
+// Type: Protocol validation (NOT production system)
+//
+// Tests:
+// - Run deterministic scenario with metrics collection
+// - Track author weights and scoring overlay
+// - Verify convergence to same preferred tip
+// - Read-only metrics (no state modification)
+//
+// Note: For production, use gov_ledger.cpp
+//       This file is for protocol metrics validation.
 
 #include <cstdio>
 #include <vector>
