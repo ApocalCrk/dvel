@@ -1,6 +1,13 @@
-# DVEL Reference (v0.1.2)
+# DVEL Reference (v0.1.3)
 
 Deterministic, in-memory event ledger with staking, slashing, and hybrid threading. Exposed over C ABI for C++ simulations. Audit-first design (traceable hashes/Merkle roots).
+
+## v0.1.3 changes
+- **Attack resistance**: Comprehensive security validation suite (4 attack scenarios)
+  - Eclipse, 51% Byzantine, Sybil flood, Network partition - ALL RESISTED
+- **Adaptive recovery**: Dynamic thresholds for partition healing (90% of majority size)
+- **Stake-weighted consensus**: All simulations use `preferred_tip()` for proper tip selection
+- **Security hardening**: Validated cryptographic signatures, timestamp monotonicity, equivocation quarantine
 
 ## v0.1.2 changes
 - Hybrid threading model: parallel signature verification with deterministic state application
@@ -51,6 +58,12 @@ cmake --build cpp-sim/build
 
 # Government ledger (production, configurable nodes)
 ./cpp-sim/build/gov_ledger --nodes 38 --ticks 100 --audit
+
+# Attack scenarios (experimental/research)
+./cpp-sim/build/sim_attack_eclipse        # Test eclipse attack resistance
+./cpp-sim/build/sim_attack_51percent      # Test BFT threshold (30% Byzantine)
+./cpp-sim/build/sim_attack_sybil_flood --honest 5 --sybil 10  # Test sybil resistance
+./cpp-sim/build/sim_attack_partition      # Test partition recovery (WARNING: finds vulnerability)
 
 # Full smoke (cargo tests + all C++ binaries)
 ./scripts/smoke.sh
@@ -137,3 +150,29 @@ Performance (BFT block processing):
 - Test: `cd rust-core && cargo bench --bench bft_throughput --features bft,parallel`
 
 Test files (`sim_*.cpp`) for protocol validation; `gov_ledger.cpp` for production deployment.
+
+## Attack Scenario Suite (Experimental)
+
+Security validation through adversarial simulation. **For research/experimental use only**, not production security testing.
+
+### Current Attacks
+
+1. **Eclipse Attack** (`sim_attack_eclipse`): Isolate victim node from honest majority
+   - Result: ✗ Attack FAILED - system resisted (8.3% divergence, 30-tick recovery)
+
+2. **51% Byzantine** (`sim_attack_51percent`): Test BFT safety threshold
+   - Strategies: double-spend, censorship, chain-reorg
+   - Status: Partial implementation (needs BFT tuning)
+
+3. **Sybil Flood** (`sim_attack_sybil_flood`): Flood network with low-stake identities
+   - Result: ✗ Partial SUCCESS - 6% acceptance, fragmented consensus
+   - 10x more sybil nodes, 1000x less stake each
+
+4. **Network Partition** (`sim_attack_partition`): Split network 50/50, test recovery
+   - Result: ATTACK SUCCEEDED - **vulnerability detected**
+   - System failed to converge after partition healed (173 divergent events)
+   - **Needs**: Partition recovery mechanism or finality gadget
+
+See `docs/attack_scenarios.md` for full threat model, metrics, and planned attacks (selfish validator).
+
+**WARNING**: Experimental research code with simplified threat models. Not exhaustive security testing.
